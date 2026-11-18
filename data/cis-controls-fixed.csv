@@ -1,0 +1,28 @@
+ID,CIS,Title
+26000,1.1.1,Ensure 'Enforce password history' is set to '24 or more password(s)'.
+26002,1.1.3,Ensure 'Minimum password age' is set to '1 or more day(s)'.
+26003,1.1.4,Ensure 'Minimum password length' is set to '14 or more character(s)'.
+26005,1.2.1,Ensure 'Account lockout duration' is set to '15 or more minute(s)'.
+26006,1.2.2,"Ensure 'Account lockout threshold' is set to '5 or fewer invalid logon attempt(s), but not 0'."
+26007,1.2.4,Ensure 'Reset account lockout counter after' is set to '15 or more minute(s)'.
+26040,2.3.10.3,Ensure 'Network access: Do not allow anonymous enumeration of SAM accounts and shares' is set to 'Enabled'.
+26079,5.8,Ensure 'Link-Layer Topology Discovery Mapper (lltdsvc)' is set to 'Disabled'.
+26090,5.19,Ensure 'Remote Access Auto Connection Manager (RasAuto)' is set to 'Disabled'.
+26094,5.23,Ensure 'Remote Procedure Call (RPC) Locator (RpcLocator)' is set to 'Disabled'.
+26101,5.30,Ensure 'SSDP Discovery (SSDPSRV)' is set to 'Disabled'.
+26102,5.31,Ensure 'UPnP Device Host (upnphost)' is set to 'Disabled'.
+26112,5.41,Ensure 'Xbox Accessory Management Service (XboxGipSvc)' is set to 'Disabled'.
+26113,5.42,Ensure 'Xbox Live Auth Manager (XblAuthManager)' is set to 'Disabled'.
+26114,5.43,Ensure 'Xbox Live Game Save (XblGameSave)' is set to 'Disabled'.
+26115,5.44,Ensure 'Xbox Live Networking Service (XboxNetApiSvc)' is set to 'Disabled'.
+26174,18.4.5,Ensure 'Enable Certificate Padding' is set to 'Enabled'.
+26175,18.4.6,Ensure 'Enable Structured Exception Handling Overwrite Protection (SEHOP)' is set to 'Enabled'.
+26179,18.5.2,"Ensure 'MSS: (DisableIPSourceRouting IPv6) IP source routing protection level is set to 'Enabled: Highest protection, source routing is completely disabled'."
+26180,18.5.3,"Ensure 'MSS: (DisableIPSourceRouting) IP source routing protection level ' is set to 'Enabled: Highest protection, source routing is completely disabled'."
+26182,18.5.5,Ensure 'MSS: (EnableICMPRedirect) Allow ICMP redirects to override OSPF generated routes' is set to 'Disabled'.
+26193,18.6.4.3,Ensure 'Turn off multicast name resolution' is set to 'Enabled'.
+26195,18.6.8.1,Ensure 'Enable insecure guest logons' is set to 'Disabled'.
+26222,18.9.3.1,Ensure 'Include command line in process creation events' is set to 'Enabled'.
+26301,18.10.7.1,Ensure 'Disallow Autoplay for non-volume devices' is set to 'Enabled'.
+26302,18.10.7.2,Ensure 'Set the default behavior for AutoRun' is set to 'Enabled: Do not execute any autorun commands'.
+26303,18.10.7.3,Ensure 'Turn off Autoplay' is set to 'Enabled: All drives'.

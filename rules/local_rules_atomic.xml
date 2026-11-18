@@ -1,0 +1,45 @@
+<!-- Regole locali per il lab Atomic Red Team -->
+<!-- Obiettivo: alzare gravità e correggere il tag MITRE dove le regole di default sono troppo generiche -->
+<group name="local,windows,sysmon,atomic_lab,">
+
+  <!-- T1053.005: attività pianificata di persistenza (onstart / onlogon / SYSTEM) -->
+  <rule id="100100" level="10">
+    <if_sid>92032</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)schtasks.*/create.*(/sc\s+(onstart|onlogon)|/ru\s+system)</field>
+    <description>Scheduled task created for persistence (schtasks /create onstart/onlogon/SYSTEM)</description>
+    <mitre>
+      <id>T1053.005</id>
+    </mitre>
+  </rule>
+
+  <!-- T1016: System Network Configuration Discovery -->
+  <rule id="100101" level="6">
+    <if_sid>92032</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)^\s*(ipconfig|arp|nbtstat)\s</field>
+    <description>Network configuration discovery (ipconfig / arp / nbtstat)</description>
+    <mitre>
+      <id>T1016</id>
+    </mitre>
+  </rule>
+
+  <!-- T1049: System Network Connections Discovery -->
+  <rule id="100102" level="6">
+    <if_sid>92032</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)^\s*netstat\s</field>
+    <description>Network connections discovery (netstat)</description>
+    <mitre>
+      <id>T1049</id>
+    </mitre>
+  </rule>
+
+  <!-- T1087.001: enumerazione utenti connessi via cmd (query user) -->
+  <rule id="100103" level="6">
+    <if_sid>92052</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)\bquery\s+user\b</field>
+    <description>Logged-on users enumerated via cmd (query user)</description>
+    <mitre>
+      <id>T1087.001</id>
+    </mitre>
+  </rule>
+
+</group>

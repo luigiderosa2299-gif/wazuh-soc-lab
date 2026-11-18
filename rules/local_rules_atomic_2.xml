@@ -1,0 +1,64 @@
+<!-- Regole locali, secondo lotto: T1069.001 e T1057 -->
+<group name="local,windows,sysmon,atomic_lab,">
+
+  <!-- T1069.001: gruppi locali via net.exe -->
+  <rule id="100104" level="6">
+    <if_sid>92036</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)^\s*net\s+localgroup</field>
+    <description>Local permission groups discovery (net localgroup)</description>
+    <mitre>
+      <id>T1069.001</id>
+    </mitre>
+  </rule>
+
+  <!-- T1069.001: gruppi locali via PowerShell -->
+  <rule id="100105" level="6">
+    <if_sid>92027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(get-localgroup|get-localgroupmember)</field>
+    <description>Local permission groups discovery via PowerShell (Get-LocalGroup / Get-LocalGroupMember)</description>
+    <mitre>
+      <id>T1069.001</id>
+    </mitre>
+  </rule>
+
+  <!-- T1057: tasklist -->
+  <rule id="100106" level="6">
+    <if_sid>92032</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)^\s*tasklist(\s|$)</field>
+    <description>Process discovery (tasklist)</description>
+    <mitre>
+      <id>T1057</id>
+    </mitre>
+  </rule>
+
+  <!-- T1057: Get-Process / WMI Win32_Process via PowerShell -->
+  <rule id="100107" level="6">
+    <if_sid>92027</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)(get-process|win32_process)</field>
+    <description>Process discovery via PowerShell (Get-Process / Win32_Process)</description>
+    <mitre>
+      <id>T1057</id>
+    </mitre>
+  </rule>
+
+  <!-- T1057: wmic process -->
+  <rule id="100108" level="6">
+    <if_sid>92052</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)\bwmic\s+process\b</field>
+    <description>Process discovery (wmic process)</description>
+    <mitre>
+      <id>T1057</id>
+    </mitre>
+  </rule>
+
+  <!-- T1057: ricerca mirata del processo lsass -->
+  <rule id="100109" level="8">
+    <if_sid>92032</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">(?i)^\s*findstr\s.*lsass</field>
+    <description>Process discovery targeting lsass (findstr lsass)</description>
+    <mitre>
+      <id>T1057</id>
+    </mitre>
+  </rule>
+
+</group>
