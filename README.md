@@ -1,92 +1,92 @@
-# Wazuh SOC Lab: detection engineering, vulnerability assessment e hardening CIS
+# Wazuh SOC Lab: detection engineering, vulnerability assessment and CIS hardening
 
-> ⚠️ **Disclaimer etico.** Tutti i test sono stati eseguiti su macchine virtuali di mia proprietà, in una rete di laboratorio. Atomic Red Team esegue tecniche offensive reali: non usarlo su sistemi che non ti appartengono o senza autorizzazione scritta.
+> ⚠️ **Ethical Disclaimer.** All tests were run on virtual machines I own, in a lab network. Atomic Red Team runs real offensive techniques: do not use it on systems you do not own or without written authorization.
 
-## 📌 Obiettivo
+## 📌 Objective
 
-Costruire un piccolo SOC domestico e usarlo per tre attività tipiche di un analista: verificare cosa rileva un SIEM per default, scrivere regole di detection dove manca la copertura, e misurare il prima/dopo di patching e hardening. Moduli Security+ coinvolti: monitoraggio e logging, gestione delle vulnerabilità, hardening, framework MITRE ATT&CK.
+Build a small home SOC and use it for three typical analyst tasks: check what a SIEM detects by default, write detection rules where coverage is missing, and measure the before/after of patching and hardening. Security+ topics involved: monitoring and logging, vulnerability management, hardening, the MITRE ATT&CK framework.
 
-## 🧩 Contesto
+## 🧩 Context
 
-- **Server**: Wazuh 4.14.1 all-in-one (manager, indexer, dashboard) su Ubuntu Server 24.04 ARM, VM UTM.
-- **Endpoint**: Windows 11 Home (ARM, build 26200) con agente Wazuh 4.14.1 e Sysmon.
-- **Generatore di attività**: Atomic Red Team (Invoke-AtomicRedTeam 2.1.0).
+- **Server**: Wazuh 4.14.1 all-in-one (manager, indexer, dashboard) on Ubuntu Server 24.04 ARM, UTM VM.
+- **Endpoint**: Windows 11 Home (ARM, build 26200) with the Wazuh 4.14.1 agent and Sysmon.
+- **Activity generator**: Atomic Red Team (Invoke-AtomicRedTeam 2.1.0).
 
-## 🛠 Tecnologie
+## 🛠 Technologies and Tools
 
 Wazuh (SIEM, Vulnerability Detection, SCA), Sysmon, Atomic Red Team, MITRE ATT&CK, CIS Microsoft Windows 11 Enterprise Benchmark v3.0.0, PowerShell, winget.
 
-## ⚙️ Cosa ho fatto
+## ⚙️ What I Did
 
-1. Installato Wazuh con lo script `wazuh-install.sh -a` e collegato l'agente Windows.
-2. Verificato la pipeline con eventi semplici (creazione utente locale, logon falliti): regole 60109, 60122, ecc.
-3. Installato Sysmon e collegato il suo canale eventi a Wazuh.
-4. Eseguito tecniche Atomic Red Team una alla volta, sempre con `-TestNumbers`, seguendo il ciclo `-ShowDetailsBrief` → esecuzione → `-Cleanup`: T1033, T1082, T1087.001, T1069.001, T1016, T1049, T1057, T1053.005, T1547.001.
-5. Letto in Wazuh cosa generava ogni tecnica con le regole di default e individuato le lacune di copertura (vedi Risultati).
-6. Scritto 10 regole custom (ID 100100-100109) in `rules/`, che estendono le regole Sysmon di Wazuh con controlli sulla riga di comando. Le ho caricate dal dashboard (Server management → Rules) e riavviato il manager.
-7. Rieseguito i test e confrontato gli alert prima e dopo.
-8. Lanciato la scansione Vulnerability Detection, applicato le patch con `winget upgrade` e ripetuto la scansione.
-9. Usato SCA (policy CIS Windows 11 Enterprise) per estrarre i controlli falliti, scelto 27 controlli sicuri (password e blocco account, chiavi di registro, servizi inutili), applicati con `net accounts`, e `Set-ItemProperty` sul registro (anche `Start=4` per disattivare i servizi), e riavviato l'agente per forzare una nuova scansione.
+1. Installed Wazuh with the `wazuh-install.sh -a` script and connected the Windows agent.
+2. Verified the pipeline with simple events (local user creation, failed logons): rules 60109, 60122, etc.
+3. Installed Sysmon and connected its event channel to Wazuh.
+4. Ran Atomic Red Team techniques one at a time, always with `-TestNumbers`, following the `-ShowDetailsBrief` → execution → `-Cleanup` cycle: T1033, T1082, T1087.001, T1069.001, T1016, T1049, T1057, T1053.005, T1547.001.
+5. Looked in Wazuh at what each technique generated with the default rules and identified the coverage gaps (see Results).
+6. Wrote 10 custom rules (IDs 100100-100109) in `rules/`, which extend Wazuh's Sysmon rules with command-line checks. I loaded them from the dashboard (Server management → Rules) and restarted the manager.
+7. Re-ran the tests and compared the alerts before and after.
+8. Ran the Vulnerability Detection scan, applied patches with `winget upgrade` and repeated the scan.
+9. Used SCA (CIS Windows 11 Enterprise policy) to extract the failed checks, chose 27 safe checks (password and account lockout, registry keys, unneeded services), applied them with `net accounts` and `Set-ItemProperty` on the registry (also `Start=4` to disable services), and restarted the agent to force a new scan.
 
-## 📊 Risultati
+## 📊 Results
 
 ### Detection engineering
 
-| Tecnica | Regola di default | Regola custom |
+| Technique | Default rule | Custom rule |
 |---|---|---|
-| T1053.005 (task pianificato di persistenza) | 92032, livello 3, tag generico T1087 | **100100**, livello 10 |
-| T1016 (ipconfig/arp/nbtstat) | 92032, livello 3 | **100101**, livello 6 |
-| T1049 (netstat) | 92032, livello 3 | **100102**, livello 6 |
-| T1087.001 (`query user`) | 92052, livello 4 | **100103**, livello 6 |
-| T1069.001 (gruppi locali) | 92036/92031 (3), 92027 (4) | **100104**, **100105**, livello 6 |
-| T1057 (processi) | 92032 (3), 92027/92052 (4) | **100106-100108** (6), **100109** (8) |
-| T1547.001 (chiave Run) | 92302, livello 6, tag corretto | nessuna regola necessaria |
+| T1053.005 (scheduled task for persistence) | 92032, level 3, generic tag T1087 | **100100**, level 10 |
+| T1016 (ipconfig/arp/nbtstat) | 92032, level 3 | **100101**, level 6 |
+| T1049 (netstat) | 92032, level 3 | **100102**, level 6 |
+| T1087.001 (`query user`) | 92052, level 4 | **100103**, level 6 |
+| T1069.001 (local groups) | 92036/92031 (3), 92027 (4) | **100104**, **100105**, level 6 |
+| T1057 (processes) | 92032 (3), 92027/92052 (4) | **100106-100108** (6), **100109** (8) |
+| T1547.001 (Run key) | 92302, level 6, correct tag | no rule needed |
 
-Senza le regole custom, la creazione di un task pianificato come SYSTEM all'avvio (T1053.005) produceva solo un alert di livello 3 con tecnica sbagliata.
+Without the custom rules, creating a scheduled task as SYSTEM at startup (T1053.005) produced only a level 3 alert with the wrong technique.
 
-**Falsi positivi osservati**
-- La regola 92213 (livello 15, T1105) scatta a ogni avvio di PowerShell: segnala un eseguibile/script in `AppData\Local\Temp`.
-- La regola 92041 (livello 10) ha segnalato come "Base64-like" il percorso `C:\Path\AtomicRedTeam.exe`.
-- La regola 92058 (livello 12, `sdbinst.exe -m -bg`) è risultata attività di manutenzione di Windows.
+**False positives observed**
+- Rule 92213 (level 15, T1105) fires on every PowerShell start: it flags an executable/script in `AppData\\Local\\Temp`.
+- Rule 92041 (level 10) flagged the path `C:\\Path\\AtomicRedTeam.exe` as "Base64-like".
+- Rule 92058 (level 12, `sdbinst.exe -m -bg`) turned out to be Windows maintenance activity.
 
-**Limiti delle regole custom**
-- Leggono solo il testo della riga di comando: non coprono comandi offuscati o in Base64, né strumenti che usano API senza lanciare processi.
-- I livelli (6, 8, 10) sono una mia scelta per rendere gli eventi visibili. Su una macchina reale servirebbe una taratura per evitare rumore.
+**Limitations of the custom rules**
+- They only read the command-line text: they do not cover obfuscated or Base64-encoded commands, or tools that use APIs without launching processes.
+- The levels (6, 8, 10) are my own choice to make the events visible. On a real machine they would need tuning to avoid noise.
 
 ### Vulnerability Detection
 
-![Vulnerability Detection e SCA prima delle modifiche](img/vuln-sca-before.png)
+![Vulnerability Detection and SCA before the changes](img/vuln-sca-before.png)
 
-| | Totale | Critical | High | Medium | Low |
+| | Total | Critical | High | Medium | Low |
 |---|---|---|---|---|---|
-| Scansione 1 | 121 | 0 | 19 | 93 | 9 |
-| Scansione 2 (dopo patch) | 16 | 0 | 7 | 8 | 1 |
+| Scan 1 | 121 | 0 | 19 | 93 | 9 |
+| Scan 2 (after patching) | 16 | 0 | 7 | 8 | 1 |
 
-- Wireshark 4.6.4 → 4.6.9: 103 CVE chiuse (11 High).
-- Aggiornati anche Python (3.15.0 → 3.15.2) e il QEMU guest agent; il pacchetto QEMU non compare più tra i risultati.
+- Wireshark 4.6.4 → 4.6.9: 103 CVEs closed (11 High).
+- I also updated Python (3.15.0 → 3.15.2) and the QEMU guest agent; the QEMU package no longer appears in the results.
 
-### Hardening CIS (SCA)
+### CIS hardening (SCA)
 
-![Punteggio SCA dopo l'hardening](img/sca-after-hardening.png)
+![SCA score after hardening](img/sca-after-hardening.png)
 
-| | Superati | Falliti | Score |
+| | Passed | Failed | Score |
 |---|---|---|---|
-| Prima | 114 | 358 | 24% |
-| Dopo | 141 | 331 | 29% |
+| Before | 114 | 358 | 24% |
+| After | 141 | 331 | 29% |
 
-Il confronto tra l'export dei controlli falliti prima e quello dei superati dopo mostra esattamente 27 controlli passati a *Passed*, gli stessi che avevo applicato (elenco in `data/cis-controls-fixed.csv`). Nessun altro controllo è cambiato.
+Comparing the export of failed checks before with the export of passed checks after shows exactly 27 checks moved to *Passed*, the same ones I had applied (list in `data/cis-controls-fixed.csv`). No other check changed.
 
-**Limite**: il benchmark è per Enterprise e la VM è Home. Molti controlli sono già superati perché la funzione non è installata, quindi lo score complessivo non misura l'hardening reale. Il dato significativo è il delta dei 27 controlli modificati.
+**Limitation**: the benchmark is for Enterprise and the VM is Home. Many checks already pass because the feature is not installed, so the overall score does not measure real hardening. The meaningful figure is the delta of the 27 modified checks.
 
-## 💡 Cosa ho imparato
+## 💡 What I Learned
 
-- Le regole di default di Wazuh per Sysmon riconoscono l'esecuzione di `cmd.exe` o PowerShell, ma assegnano tecniche e livelli generici: la copertura di una tecnica ATT&CK specifica va verificata con un test, non data per scontata.
-- Una regola figlia (`if_sid`) con un filtro `pcre2` sulla riga di comando è sufficiente per dare livello e tecnica corretti a un comportamento noto, ma resta aggirabile con l'offuscamento.
-- Il livello 15 non indica per forza un attacco: una singola regola troppo larga (92213) può generare alert massimi a ogni avvio di PowerShell.
-- La scansione delle vulnerabilità si basa sull'inventario del software e sul confronto di versioni: dopo una patch l'inventario va rigenerato (riavvio dell'agente) prima di rilanciare la scansione.
-- Il punteggio SCA dipende dall'edizione del sistema rispetto al benchmark. Conviene riportare i controlli cambiati, non solo la percentuale.
+- Wazuh's default Sysmon rules recognize the execution of `cmd.exe` or PowerShell, but assign generic techniques and levels: coverage of a specific ATT&CK technique must be verified with a test, not taken for granted.
+- A child rule (`if_sid`) with a `pcre2` filter on the command line is enough to give the correct level and technique to a known behavior, but it can still be bypassed with obfuscation.
+- Level 15 does not necessarily indicate an attack: a single overly broad rule (92213) can generate maximum-level alerts on every PowerShell start.
+- Vulnerability scanning relies on the software inventory and version comparison: after a patch the inventory must be regenerated (agent restart) before re-running the scan.
+- The SCA score depends on the system edition relative to the benchmark. It is better to report the changed checks, not just the percentage.
 
-## 🔗 Collegamenti
+## 🔗 Links
 
 - [Wazuh documentation](https://documentation.wazuh.com/)
 - [Atomic Red Team](https://github.com/redcanaryco/atomic-red-team)
